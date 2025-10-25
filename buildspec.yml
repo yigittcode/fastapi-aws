@@ -15,19 +15,15 @@ phases:
     - echo "Logging in to Amazon ECR..."
     - REPO_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME
     - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-
     - echo "Installing dependencies using uv..."
     # uv sync ile bağımlılıkları kur
     - uv sync
-
     - echo "Running Linter (Ruff)..."
     # uv run ile ruff'ı çalıştır
     - uv run ruff check .
-
     - echo "Running Unit Tests (Pytest)..."
     # uv run ile pytest'i çalıştır
     - uv run pytest
-
     - echo "Running Vulnerability Scan (uv audit)..."
     - uv pip audit
 
