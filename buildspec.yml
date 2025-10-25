@@ -13,16 +13,21 @@ phases:
   pre_build:
     commands:
       - echo "Logging in to Amazon ECR..."
+      # Bu değişkenleri CodeBuild projesinde tanımlamıştık
       - REPO_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
       - echo "Installing all dependencies WITH EXTRAS (for test/lint)..."
-      - uv pip sync pyproject.toml --all-extras --system
+      # HATA BURADAYDI: 'sync' yerine 'install' kullanıyoruz
+      # ve 'dev' extras'ı belirtiyoruz.
+      - uv pip install ".[dev]" --system
 
       - echo "Running Linter (Ruff)..."
+      # Artık 'ruff' komutu bulunacak
       - ruff check .
 
       - echo "Running Unit Tests (Pytest)..."
+      # Artık 'pytest' komutu bulunacak
       - pytest
 
       - echo "Running Vulnerability Scan (uv audit)..."
