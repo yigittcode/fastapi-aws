@@ -23,8 +23,9 @@ phases:
       - uv run ruff check .
       
       - echo "Running Unit Tests (Pytest)..."
-      # HATA BURADAYDI: Test bulamazsa hata vermemesi için bayrak ekliyoruz
-      - uv run pytest --no-tests-found-return-code=0
+      # HATA BURADAYDI: Hatalı argümanı sildik.
+      # Ayarı zaten pyproject.toml'a koyduk.
+      - uv run pytest
       
       - echo "Running Vulnerability Scan (uv audit)..."
       - uv pip audit

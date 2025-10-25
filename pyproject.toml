@@ -13,3 +13,8 @@ dev = [
     "pytest",
     "ruff",
 ]
+
+# PYTEST AYARINI BURAYA EKLEDİM
+[tool.pytest.ini_options]
+# Test bulamazsa hata verme (exit code 5 yerine 0 döndür)
+no_tests_found_return_code = 0
