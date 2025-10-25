@@ -17,14 +17,13 @@ phases:
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
       - echo "Installing all dependencies WITH EXTRAS (for test/lint)..."
-      # BU SATIRI DEĞİŞTİRDİK
-      - uv pip sync pyproject.toml --all-extras
+      - uv pip sync pyproject.toml --all-extras --system
 
       - echo "Running Linter (Ruff)..."
-      - uv run ruff check .
+      - ruff check .
 
       - echo "Running Unit Tests (Pytest)..."
-      - uv run pytest
+      - pytest
 
       - echo "Running Vulnerability Scan (uv audit)..."
       - uv pip audit
