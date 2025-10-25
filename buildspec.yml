@@ -24,7 +24,7 @@ phases:
       
       - echo "Running Unit Tests (Pytest)..."
       # HATA BURADAYDI: Hatalı argümanı sildik.
-      # Ayarı zaten pyproject.toml'a koyduk.
+      # Artık bir testimiz olduğu için buna gerek yok.
       - uv run pytest
       
       - echo "Running Vulnerability Scan (uv audit)..."
