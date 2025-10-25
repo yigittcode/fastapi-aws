@@ -17,10 +17,9 @@ phases:
       - REPO_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
-      - echo "Installing all dependencies WITH EXTRAS (for test/lint)..."
-      # HATA BURADAYDI: 'sync' yerine 'install' kullanıyoruz
-      # ve 'dev' extras'ı belirtiyoruz.
-      - uv pip install ".[dev]" --system
+      - echo "Installing dependencies (fastapi, pytest, ruff) explicitly..."
+      # HATA BURADAYDI: TOML okumak yerine paketleri doğrudan kuruyoruz.
+      - uv pip install "fastapi[standard]>=0.120.0" pytest ruff --system
 
       - echo "Running Linter (Ruff)..."
       # Artık 'ruff' komutu bulunacak
