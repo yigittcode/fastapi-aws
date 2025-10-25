@@ -1,0 +1,58 @@
+version: 0.2
+
+phases:
+  install:
+    # CodeBuild'un AL2:5.0 imajında Python 3.11 var, onu kullanabiliriz
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo "Installing uv..."
+      - pip install uv
+      - uv --version
+
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - REPO_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+      - echo "Installing all dependencies WITH EXTRAS (for test/lint)..."
+      # BU SATIRI DEĞİŞTİRDİK
+      - uv pip sync pyproject.toml --all-extras
+
+      - echo "Running Linter (Ruff)..."
+      - uv run ruff check .
+
+      - echo "Running Unit Tests (Pytest)..."
+      - uv run pytest
+
+      - echo "Running Vulnerability Scan (uv audit)..."
+      - uv pip audit
+
+  build:
+    commands:
+      - echo "Building the Docker image..."
+      # Commit hash'ini al (kısa versiyon)
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      
+      # İmajı ECR URI'si ile etiketle
+      - docker build -t $REPO_URI:latest .
+      - docker tag $REPO_URI:latest $REPO_URI:$COMMIT_HASH
+
+  post_build:
+    commands:
+      - echo "Pushing Docker images to ECR..."
+      - docker push $REPO_URI:latest
+      - docker push $REPO_URI:$COMMIT_HASH
+      
+      - echo "Creating imagedefinitions.json for CodeDeploy/ECS..."
+      # Bu dosya, bir sonraki 'Deploy' aşamasının hangi imajı
+      # kullanacağını bilmesini sağlayan 'artifact'tır.
+      # "fastapi-container" adını, CD adımında ECS Task Definition'da
+      # vereceğin container adıyla aynı yapman gerekecek.
+      - printf '[{"name":"fastapi-container","imageUri":"%s"}]' $REPO_URI:$COMMIT_HASH > imagedefinitions.json
+
+artifacts:
+  # Sadece bu dosyayı bir sonraki aşamaya (Deploy) gönder
+  files:
+    - imagedefinitions.json
